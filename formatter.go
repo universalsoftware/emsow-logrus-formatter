@@ -96,6 +96,8 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 	if !f.HideSquareBracketsForLogLevel {
 		b.WriteString(" [")
+	} else {
+		b.WriteString(" ")
 	}
 
 	if f.LogLevelPrefix != "" {
