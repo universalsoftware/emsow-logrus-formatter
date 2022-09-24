@@ -45,6 +45,15 @@ type Formatter struct {
 
 	// CustomCallerFormatter - set custom formatter for caller info
 	CustomCallerFormatter func(*runtime.Frame) string
+
+	// AddSquareBracketsForTimestamp - put the timestamp in square brackets
+	AddSquareBracketsForTimestamp bool
+
+	// HideSquareBracketsForLogLevel - hide square brackets around log level
+	HideSquareBracketsForLogLevel bool
+
+	// LogLevelPrefix - prefix before log level
+	LogLevelPrefix string
 }
 
 // Format an log entry
@@ -59,8 +68,15 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	// output buffer
 	b := &bytes.Buffer{}
 
+	if f.AddSquareBracketsForTimestamp {
+		b.WriteString("[")
+	}
 	// write time
 	b.WriteString(entry.Time.Format(timestampFormat))
+
+	if f.AddSquareBracketsForTimestamp {
+		b.WriteString("]")
+	}
 
 	// write level
 	var level string
@@ -78,13 +94,21 @@ func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 		fmt.Fprintf(b, "\x1b[%dm", levelColor)
 	}
 
-	b.WriteString(" [")
+	if !f.HideSquareBracketsForLogLevel {
+		b.WriteString(" [")
+	}
+
+	if f.LogLevelPrefix != "" {
+		b.WriteString(f.LogLevelPrefix + ".")
+	}
 	if f.ShowFullLevel {
 		b.WriteString(level)
 	} else {
 		b.WriteString(level[:4])
 	}
-	b.WriteString("]")
+	if !f.HideSquareBracketsForLogLevel {
+		b.WriteString("]")
+	}
 
 	if !f.NoFieldsSpace {
 		b.WriteString(" ")
